@@ -97,7 +97,7 @@ begin
   //showmessage('password:'+password);
   ZeroMemory(@credsToAdd, SizeOf(_CREDENTIALW));
     credsToAdd.Flags := 0;
-  	credsToAdd.Type_ := CRED_TYPE_GENERIC;
+  	credsToAdd.Type_ := CRED_TYPE_DOMAIN_PASSWORD; //CRED_TYPE_GENERIC;
   	credsToAdd.TargetName := pwidechar(target);
     credsToAdd.UserName  := pwidechar(username);
   	credsToAdd.CredentialBlob := PByte(password);
