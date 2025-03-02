@@ -13,6 +13,7 @@ type
 
   TForm1 = class(TForm)
     btngo: TButton;
+    chkpwd: TCheckBox;
     chkcred: TCheckBox;
     StaticText1: TStaticText;
     StaticText2: TStaticText;
@@ -107,6 +108,28 @@ begin
     if result=false then showmessage('credwrite:'+inttostr(getlasterror));
 end;
 
+procedure writeini(section,ident,value:string);
+var
+ini:tinifile;
+Attrs:word;
+currentdir:string;
+begin
+//currentdir:=upsapi.GetCurrentExeDir;
+    if currentdir='' then currentdir:=ExtractFilePath(application.ExeName ) ;
+if FileExists(currentdir + '\config.INI') then
+  begin
+  Attrs := FileGetAttr(currentdir + '\config.INI');
+  if Attrs and fareadonly <> 0 then exit;
+  end;
+
+//if FileExists(GetCurrentDir + '\config.INI')=false then exit;
+try
+  ini:=tinifile.Create (currentdir + '\config.INI');
+  ini.WriteString(section,ident,value);
+finally
+  freeandnil(ini);
+end;
+end;
 
 function readini(section,ident,default:string;config:string=''):string;
 var
@@ -132,16 +155,19 @@ procedure TForm1.btngoClick(Sender: TObject);
 var
 ret:longint;
 begin
+if chkpwd.Checked then
+begin
   try
   ret:=NetUserChangePassword(PWideChar(WideString(txttarget.text)), // should it be '\\'+server?
     PWideChar(WideString(txtusername.Text )),
     PWideChar(WideString(txtoldpwd.Text )),
     PWideChar(WideString(txtnewpwd.Text )));
   if ret<>0 then showmessage(SysErrorMessage(ret)) else showmessage('OK');
+  writeini('setup','username',txtusername.Text );
     except
     on e:exception do showmessage(e.Message);
     end;
-
+end;
 
 if chkcred.Checked then
   begin
@@ -153,6 +179,7 @@ end;
 procedure TForm1.FormShow(Sender: TObject);
 begin
 txttarget.Text :=readini('setup','server','.');
+txtusername.Text :=readini('setup','username','');
 txtusername.SetFocus ;
 end;
 
